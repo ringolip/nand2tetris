@@ -1,0 +1,31 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/PC.hdl
+
+/**
+ * A 16-bit counter with load and reset control bits.
+ * if      (reset[t] == 1) out[t+1] = 0
+ * else if (load[t] == 1)  out[t+1] = in[t]
+ * else if (inc[t] == 1)   out[t+1] = out[t] + 1  (integer addition)
+ * else                    out[t+1] = out[t]
+ */
+
+CHIP PC {
+    IN in[16],load,inc,reset;
+    OUT out[16];
+
+    PARTS:
+    // PC的作用，每个时钟周期加1，将计数器置为想要的数n，将计数器清零，否则一直输出存储器存储的值
+
+    // Load置1选择输出新输入的值，还是原来的值
+    Mux16(a=muxout, b=in, sel=load, out=loadout);
+    // Reset选择是否置0
+    Mux16(a=loadout, b=false, sel=reset, out=resetout);
+    // 寄存器load键永远置1，输出结果
+    Register(in=resetout, load=true, out=out, out=reout);
+    // Inc在第二个时钟周期开始加1
+    Inc16(in=reout, out=incout);
+    // Inc置1选择输出寄存器加1的值
+    Mux16(a=reout, b=incout, sel=inc, out=muxout);
+}
